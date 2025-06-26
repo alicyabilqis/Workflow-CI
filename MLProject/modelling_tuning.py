@@ -41,22 +41,20 @@ mlflow.set_experiment("Forest_Cover_Tuning")
 
 for n in n_estimators_range:
     for d in max_depth_range:
-        # MLflow run per kombinasi hyperparameter (boleh pakai start_run)
-        with mlflow.start_run(nested=True):
-            model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
-            model.fit(X_train, y_train)
-            acc = model.score(X_test, y_test)
+        model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
+        model.fit(X_train, y_train)
+        acc = model.score(X_test, y_test)
 
-            mlflow.log_param("n_estimators", n)
-            mlflow.log_param("max_depth", d)
-            mlflow.log_metric("accuracy", acc)
+        mlflow.log_param("n_estimators", n)
+        mlflow.log_param("max_depth", d)
+        mlflow.log_metric("accuracy", acc)
 
-            print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
+        print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
 
-            if acc > best_accuracy:
-                best_accuracy = acc
-                best_params = {"n_estimators": n, "max_depth": d}
-                best_model = model
+        if acc > best_accuracy:
+            best_accuracy = acc
+            best_params = {"n_estimators": n, "max_depth": d}
+            best_model = model
 
     # Log best model and its metrics
     mlflow.log_metric("best_accuracy", best_accuracy)
