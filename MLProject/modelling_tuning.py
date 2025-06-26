@@ -30,35 +30,33 @@ def main(data_path):
     best_model = None
     input_example = X_test.iloc[:1]
 
-    # Gunakan run aktif dari mlflow run
-    active_run = mlflow.active_run()
-    print(f"Active run ID: {active_run.info.run_id}")
+    # MULAI RUN SECARA MANUAL (WAJIB AGAR LOGGING BERJALAN)
+    with mlflow.start_run():
+        for n in n_estimators_range:
+            for d in max_depth_range:
+                model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
+                model.fit(X_train, y_train)
+                acc = model.score(X_test, y_test)
 
-    for n in n_estimators_range:
-        for d in max_depth_range:
-            model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
-            model.fit(X_train, y_train)
-            acc = model.score(X_test, y_test)
+                mlflow.log_param(f"n_estimators_{n}_depth_{d}", n)
+                mlflow.log_metric(f"accuracy_n{n}_d{d}", acc)
 
-            mlflow.log_param(f"n_estimators_{n}_depth_{d}", n)
-            mlflow.log_metric(f"accuracy_n{n}_d{d}", acc)
+                print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
 
-            print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
+                if acc > best_accuracy:
+                    best_accuracy = acc
+                    best_params = {"n_estimators": n, "max_depth": d}
+                    best_model = model
 
-            if acc > best_accuracy:
-                best_accuracy = acc
-                best_params = {"n_estimators": n, "max_depth": d}
-                best_model = model
+        mlflow.log_params(best_params)
+        mlflow.log_metric("best_accuracy", best_accuracy)
+        mlflow.sklearn.log_model(
+            sk_model=best_model,
+            artifact_path="best_model_tuned",
+            input_example=input_example
+        )
 
-    mlflow.log_params(best_params)
-    mlflow.log_metric("best_accuracy", best_accuracy)
-    mlflow.sklearn.log_model(
-        sk_model=best_model,
-        artifact_path="best_model_tuned",
-        input_example=input_example
-    )
-
-    print(f"\nModel terbaik hasil tuning: {best_params} - Accuracy: {best_accuracy:.4f}")
+        print(f"\nModel terbaik hasil tuning: {best_params} - Accuracy: {best_accuracy:.4f}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
