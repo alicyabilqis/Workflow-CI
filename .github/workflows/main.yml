@@ -68,12 +68,13 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          # Cek jika direktori mlruns/0 ada dan menampilkan kontennya
-          echo "Checking contents of MLProject/mlruns/0/"
-          ls -l MLProject/mlruns/0/
-          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
+          cd MLProject
+          echo "Checking contents of mlruns/0/"
+          ls -l mlruns/0/
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
+          
       # Verify the existence of the model directory for RUN_ID
       - name: Verify model directory exists for RUN_ID
         run: |
