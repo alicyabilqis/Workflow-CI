@@ -30,26 +30,26 @@ def main(data_path):
     best_model = None
     input_example = X_test.iloc[:1]
 
-    # Jangan pakai mlflow.start_run() di sini karena sudah dijalankan otomatis oleh `mlflow run`
+    # Gunakan run aktif dari mlflow run
+    active_run = mlflow.active_run()
+    print(f"Active run ID: {active_run.info.run_id}")
+
     for n in n_estimators_range:
         for d in max_depth_range:
-            with mlflow.start_run(nested=True):
-                model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
-                model.fit(X_train, y_train)
-                acc = model.score(X_test, y_test)
+            model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
+            model.fit(X_train, y_train)
+            acc = model.score(X_test, y_test)
 
-                mlflow.log_param("n_estimators", n)
-                mlflow.log_param("max_depth", d)
-                mlflow.log_metric("accuracy", acc)
+            mlflow.log_param(f"n_estimators_{n}_depth_{d}", n)
+            mlflow.log_metric(f"accuracy_n{n}_d{d}", acc)
 
-                print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
+            print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
 
-                if acc > best_accuracy:
-                    best_accuracy = acc
-                    best_params = {"n_estimators": n, "max_depth": d}
-                    best_model = model
+            if acc > best_accuracy:
+                best_accuracy = acc
+                best_params = {"n_estimators": n, "max_depth": d}
+                best_model = model
 
-    # Log model terbaik di run utama (tanpa membuat run baru)
     mlflow.log_params(best_params)
     mlflow.log_metric("best_accuracy", best_accuracy)
     mlflow.sklearn.log_model(
@@ -65,4 +65,3 @@ if __name__ == "__main__":
     parser.add_argument("--data_path", type=str, required=True)
     args = parser.parse_args()
     main(args.data_path)
-
