@@ -1,0 +1,9 @@
+name: Forest_Cover_Classification
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      data_path: {type: str, default: "Forest cover_preprocessing_dataset.csv"}
+    command: "modelling_tuning.py --data_path {data_path}"
