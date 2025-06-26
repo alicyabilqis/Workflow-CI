@@ -28,7 +28,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Hyperparameter ranges
 n_estimators_range = [50, 100, 150]
-max_depth_range = [10, 20, 3]()
+max_depth_range = [10, 20, 3]
 best_accuracy = 0
 best_params = {}
 best_model = None
