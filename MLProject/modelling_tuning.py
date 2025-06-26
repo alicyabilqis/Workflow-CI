@@ -39,7 +39,6 @@ input_example = X_test.iloc[:1]
 # Start MLflow experiment run
 mlflow.set_experiment("Forest_Cover_Tuning")
 
-with mlflow.start_run(run_name="Hyperparameter Tuning"):
     for n in n_estimators_range:
         for d in max_depth_range:
             with mlflow.start_run(nested=True):
