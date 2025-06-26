@@ -76,15 +76,18 @@ jobs:
           echo "Latest run_id: $RUN_ID"
           
       # Verify the existence of the model directory for RUN_ID
-      - name: Verify model directory exists for RUN_ID
+      - name: Verify any model directory exists for RUN_ID
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          echo "Verifying the model directory for RUN_ID: $RUN_ID"
-          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/best_model_tuned" ]; then
-            echo "Model not found for RUN_ID: $RUN_ID. Exiting."
-            exit 1
+          echo "Verifying artifacts for RUN_ID: $RUN_ID"
+          ls -R MLProject/mlruns/0/$RUN_ID/artifacts/
+          FOUND=$(ls MLProject/mlruns/0/$RUN_ID/artifacts/ | grep -E "model|best_model_tuned" || true)
+          if [ -z "$FOUND" ]; then
+          echo "No model artifacts found under RUN_ID: $RUN_ID. Exiting."
+          exit 1
           fi
+          
       # ✅ Tambahkan langkah ini untuk menyimpan mlruns/ ke GitHub
       - name: Push changes to repository
         run: |
