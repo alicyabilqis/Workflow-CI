@@ -12,4 +12,4 @@ dependencies:
   - psutil==5.9.5
   - scikit-learn==1.6.1
   - scipy==1.15.3
-name: mlflow-env
+name: Forest_Cover_Classification
