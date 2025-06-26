@@ -31,16 +31,16 @@ def main(data_path):
     input_example = X_test.iloc[:1]
 
     # MULAI RUN SECARA MANUAL (WAJIB AGAR LOGGING BERJALAN)
-    with mlflow.start_run():
+    # Tambahkan ini sebelum loop
+    with mlflow.start_run(run_name="Hyperparameter_Tuning"):  # ✅ run utama manual
         for n in n_estimators_range:
             for d in max_depth_range:
+                # Nested run tidak dipakai (optional)
                 model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
                 model.fit(X_train, y_train)
                 acc = model.score(X_test, y_test)
 
-                mlflow.log_param(f"n_estimators_{n}_depth_{d}", n)
-                mlflow.log_metric(f"accuracy_n{n}_d{d}", acc)
-
+                mlflow.log_metric(f"accuracy_n{n}_d{d}", acc)  # ✅ Hindari param overwrite
                 print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
 
                 if acc > best_accuracy:
@@ -56,7 +56,8 @@ def main(data_path):
             input_example=input_example
         )
 
-        print(f"\nModel terbaik hasil tuning: {best_params} - Accuracy: {best_accuracy:.4f}")
+    print(f"\nModel terbaik hasil tuning: {best_params} - Accuracy: {best_accuracy:.4f}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
