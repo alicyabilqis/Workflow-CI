@@ -7,7 +7,8 @@ on:
   pull_request:
     branches:
       - main
-      
+ workflow_dispatch:
+ 
 env:
   CSV_URL: "MLProject/Forest cover_preprocessing_dataset.csv"
   TARGET_VAR: "Cover_Type"
@@ -101,7 +102,7 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/model" --name cc
+          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/best_model_tuned" --name cc
 
       # ✅ Login ke Docker Hub
       - name: Log in to Docker Hub
