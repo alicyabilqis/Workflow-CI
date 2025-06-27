@@ -1,4 +1,3 @@
-
 import pandas as pd
 import mlflow
 import mlflow.sklearn
@@ -22,8 +21,8 @@ def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> s
         raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
 
 def main(data_path):
-    mlflow.set_tracking_uri("file:./mlruns")
-    mlflow.set_experiment("Forest_Cover_Classification")
+    # HAPUS BARIS INI JIKA PAKAI `mlflow run .`
+    # mlflow.set_experiment("Forest_Cover_Classification")
 
     local_data_path = download_if_needed(data_path)
     df = pd.read_csv(local_data_path)
@@ -60,7 +59,8 @@ def main(data_path):
     conf_matrix = confusion_matrix(y_test, y_pred)
     tn, fp, fn, tp = (0, 0, 0, 0) if conf_matrix.shape != (2, 2) else conf_matrix.ravel()
 
-    with mlflow.start_run(run_name="Hyperparameter_Tuning", nested=True):
+    # ⚠️ INI PENTING: JANGAN pakai `run_name` atau `nested`!
+    with mlflow.start_run():
         mlflow.log_params(best_params)
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("recall", recall)
