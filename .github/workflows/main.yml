@@ -20,32 +20,34 @@ jobs:
       - name: 📦 Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🐍 Setup Python 3.12.7
+      - name: 🐍 Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.12.7"
 
-      - name: ⚙️ Check Env
-        run: echo "CSV_URL: $CSV_URL"
+      - name: 🔍 Check Environment Variables
+        run: |
+          echo "CSV_URL: $CSV_URL"
 
-      - name: 🧪 Set up Conda
+      - name: 🧬 Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: MLProject/conda.yaml
           activate-environment: forest-cover-classification
           auto-activate-base: false
 
-      - name: 🔄 Initialize Conda for Bash
+      - name: 🔁 Initialize Conda
         run: |
+          echo "Initializing Conda for bash"
           conda init bash
           source ~/.bashrc
 
-      - name: 📥 Install MLflow & Dependencies
+      - name: 📦 Install MLflow and Dependencies
         run: |
           source ~/.bashrc
           conda activate forest-cover-classification
           pip install mlflow
-          pip install -r MLProject/requirements.txt || echo "No requirements.txt found"
+          pip install -r MLProject/requirements.txt || echo "Skipping if no requirements.txt"
 
       - name: 🚀 Run MLflow Project
         run: |
@@ -54,23 +56,23 @@ jobs:
           cd MLProject
           mlflow run . -P data_path=$CSV_URL --env-manager=local
 
-      - name: 🆔 Get latest MLflow run_id
+      - name: 🏷️ Get latest MLflow run_id
         run: |
           source ~/.bashrc
           conda activate forest-cover-classification
-          cd MLProject/mlruns/0/
-          RUN_ID=$(ls -td */ | head -n 1 | cut -d'/' -f1)
+          echo "Checking contents of MLProject/mlruns/0/"
+          ls -l MLProject/mlruns/0/
+          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
-      - name: 🧪 Verify model directory exists for RUN_ID
+      - name: ✅ Verify model directory exists
         run: |
           source ~/.bashrc
           conda activate forest-cover-classification
-          MODEL_DIR=MLProject/mlruns/0/$RUN_ID/artifacts/model
-          echo "Checking: $MODEL_DIR"
-          if [ ! -d "$MODEL_DIR" ]; then
-            echo "❌ Model not found for RUN_ID: $RUN_ID. Exiting."
+          echo "Verifying model directory for RUN_ID: $RUN_ID"
+          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/model" ]; then
+            echo "❌ Model directory not found. Exiting."
             exit 1
           fi
 
@@ -80,16 +82,16 @@ jobs:
           git config --global user.email "${{ secrets.GIT_EMAIL }}"
           git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
           git add .
-          git commit -m "Save mlruns from CI run" || echo "No changes to commit"
+          git commit -m "Save mlruns from Forest Cover CI run" || echo "No changes to commit"
           git push origin main
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
-      - name: 🐳 Build Docker Image from MLflow model
+      - name: 🐳 Build Docker Image from MLflow Model
         run: |
           source ~/.bashrc
           conda activate forest-cover-classification
-          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/model" --name forest-cover-image
+          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/model" --name forest-cover-model
 
       - name: 🔐 Login to Docker Hub
         uses: docker/login-action@v2
@@ -99,8 +101,8 @@ jobs:
 
       - name: 🏷️ Tag Docker Image
         run: |
-          docker tag forest-cover-image ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+          docker tag forest-cover-model ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
 
-      - name: 🚢 Push Docker Image to Docker Hub
+      - name: 📦 Push Docker Image
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
