@@ -58,7 +58,8 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
-          mlflow run . --env-manager=local
+          mlflow run . --env-manager=local --experiment-name "Forest Cover Classification"
+
 
       - name: 🔍 Get latest MLflow run_id
         run: |
