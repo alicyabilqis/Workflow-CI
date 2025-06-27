@@ -5,5 +5,5 @@ conda_env: conda.yaml
 entry_points:
   main:
     parameters:
-      data_path: {type: str, default: "Forest cover_preprocessing_dataset.csv"}
+      data_path: {type: str, default: "https://drive.google.com/uc?export=download&id=1u4eL5GYTfv5AWZ0PUWNP2N9EEpn6n-NS"}
     command: "python modelling_tuning.py --data_path {data_path}"
