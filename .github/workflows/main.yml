@@ -2,12 +2,14 @@ name: CI/CD MLflow
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 env:
-  CSV_URL: "MLProject/Forest cover_preprocessing_dataset.csv"
+  CSV_URL: "https://drive.google.com/uc?export=download&id=1u4eL5GYTfv5AWZ0PUWNP2N9EEpn6n-NS"
   TARGET_VAR: "Cover_Type"
 
 jobs:
@@ -23,77 +25,82 @@ jobs:
         with:
           python-version: "3.12.7"
 
-      - name: 🧪 Check Env Vars
-        run: echo "Using CSV: $CSV_URL"
+      - name: ⚙️ Check Env
+        run: echo "CSV_URL: $CSV_URL"
 
-      - name: 🧬 Setup Conda
+      - name: 🧪 Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: MLProject/conda.yaml
-          activate-environment: Forest_Cover_Classification
+          activate-environment: forest-cover-classification
           auto-activate-base: false
 
-      - name: 🔧 Initialize Conda
+      - name: 🔄 Initialize Conda for Bash
         run: |
           conda init bash
           source ~/.bashrc
 
-      - name: 📦 Install Dependencies
+      - name: 📥 Install MLflow & Dependencies
         run: |
           source ~/.bashrc
-          conda activate Forest_Cover_Classification
+          conda activate forest-cover-classification
           pip install mlflow
-          [ -f MLProject/requirements.txt ] && pip install -r MLProject/requirements.txt || echo "✅ No extra requirements"
-
-      - name: 🧹 Clean mlruns and re-init experiment
-        run: |
-          rm -rf MLProject/mlruns
-          mkdir -p MLProject/mlruns
-          mlflow experiments create --experiment-name "Forest_Cover_Classification" || true
+          pip install -r MLProject/requirements.txt || echo "No requirements.txt found"
 
       - name: 🚀 Run MLflow Project
         run: |
           source ~/.bashrc
-          conda activate Forest_Cover_Classification
+          conda activate forest-cover-classification
           cd MLProject
-          mlflow run . --env-manager=local --experiment-name "Forest_Cover_Classification"
+          mlflow run . -P data_path=$CSV_URL --env-manager=local
 
       - name: 🆔 Get latest MLflow run_id
         run: |
           source ~/.bashrc
-          conda activate Forest_Cover_Classification
-          echo "📂 Checking MLProject/mlruns/0/"
-          ls -l MLProject/mlruns/0/
-          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
+          conda activate forest-cover-classification
+          cd MLProject/mlruns/0/
+          RUN_ID=$(ls -td */ | head -n 1 | cut -d'/' -f1)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-          echo "✅ Latest run_id: $RUN_ID"
+          echo "Latest run_id: $RUN_ID"
 
-      - name: ✅ Verify model directory exists
+      - name: 🧪 Verify model directory exists for RUN_ID
         run: |
           source ~/.bashrc
-          conda activate Forest_Cover_Classification
-          echo "🔍 Verifying the model directory for RUN_ID: $RUN_ID"
-          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/model" ]; then
-            echo "❌ Model not found for RUN_ID: $RUN_ID"
+          conda activate forest-cover-classification
+          MODEL_DIR=MLProject/mlruns/0/$RUN_ID/artifacts/model
+          echo "Checking: $MODEL_DIR"
+          if [ ! -d "$MODEL_DIR" ]; then
+            echo "❌ Model not found for RUN_ID: $RUN_ID. Exiting."
             exit 1
-          else
-            echo "✅ Model directory exists for RUN_ID: $RUN_ID"
           fi
 
-      - name: 📤 Push mlruns to repository
+      - name: 📤 Push mlruns to GitHub
         run: |
           git config --global user.name "${{ secrets.GIT_USERNAME }}"
           git config --global user.email "${{ secrets.GIT_EMAIL }}"
           git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
-          git add MLProject/mlruns || true
-          git commit -m "📝 Add mlruns from CI run" || echo "Nothing to commit"
+          git add .
+          git commit -m "Save mlruns from CI run" || echo "No changes to commit"
           git push origin main
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
-      - name: 🐳 Build Docker image from MLflow model
+      - name: 🐳 Build Docker Image from MLflow model
         run: |
           source ~/.bashrc
-          conda activate Forest_Cover_Classification
-          cd MLProject
-          mlflow models build-docker -m mlruns/0/$RUN_ID/artifacts/model
+          conda activate forest-cover-classification
+          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/model" --name forest-cover-image
+
+      - name: 🔐 Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: 🏷️ Tag Docker Image
+        run: |
+          docker tag forest-cover-image ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+
+      - name: 🚢 Push Docker Image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
