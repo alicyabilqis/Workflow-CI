@@ -48,20 +48,20 @@ jobs:
       - name: 🧹 Clean mlruns and re-init experiment
         run: |
           rm -rf MLProject/mlruns
-          mlflow experiments create --experiment-name "Forest Cover Classification" || true
+          mlflow experiments create --experiment-name "Forest_Cover_Classification" || true
 
       - name: 🚀 Run MLflow Project
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
-          mlflow run . --env-manager=local --experiment-name "Forest Cover Classification"
+          mlflow run . --env-manager=local --experiment-name "Forest_Cover_Classification"
 
       - name: 🔍 Get Experiment ID
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          EXPERIMENT_ID=$(mlflow experiments search | grep "Forest Cover Classification" | awk '{print $1}')
+          EXPERIMENT_ID=$(mlflow experiments search | grep "Forest_Cover_Classification" | awk '{print $1}')
           echo "EXPERIMENT_ID=$EXPERIMENT_ID"
           echo "EXPERIMENT_ID=$EXPERIMENT_ID" >> $GITHUB_ENV
         shell: bash
