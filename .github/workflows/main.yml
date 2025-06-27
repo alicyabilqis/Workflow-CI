@@ -69,11 +69,10 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          echo "Checking contents of MLProject/mlruns/$EXPERIMENT_ID/"
-          ls -l MLProject/mlruns/$EXPERIMENT_ID/ || exit 1
-          RUN_ID=$(ls -td MLProject/mlruns/$EXPERIMENT_ID/*/ | head -n 1 | cut -d'/' -f4)
-          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-          echo "✅ Latest RUN_ID: $RUN_ID"
+          python -c "from mlflow.tracking import MlflowClient; \
+          exp = MlflowClient().get_experiment_by_name('Forest Cover Classification'); \
+          print(f'EXPERIMENT_ID={exp.experiment_id}' if exp else 'Experiment not found')" >> $GITHUB_ENV
+
 
       - name: ✅ Verify model directory exists
         run: |
