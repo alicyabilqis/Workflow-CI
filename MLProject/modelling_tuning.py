@@ -70,13 +70,13 @@ def main(data_path):
             mlflow.log_metric("false_positive", fp)
             mlflow.log_metric("false_negative", fn)
             mlflow.log_metric("true_positive", tp)
-        mlflow.sklearn.log_model(best_model, "model", input_example=X_test.iloc[:5])
+        #mlflow.sklearn.log_model(best_model, "model", input_example=X_test.iloc[:5])
             
-        #mlflow.sklearn.log_model(
-            #sk_model=best_model,
-            #artifact_path="model",
-            #input_example=X_test.iloc[:5]
-        #)
+        mlflow.sklearn.log_model(
+            sk_model=best_model,
+            artifact_path="model",
+            input_example=X_test.iloc[:5]
+        )
 
     print("Best Parameters:", best_params)
     print(f"Accuracy: {acc}")
