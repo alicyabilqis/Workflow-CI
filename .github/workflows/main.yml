@@ -45,14 +45,14 @@ jobs:
       - name: 📦 Install MLflow and Dependencies
         run: |
           source ~/.bashrc
-          conda activate forest-cover-classification
+          conda activate forest_cover_classification
           pip install mlflow
           pip install -r MLProject/requirements.txt || echo "Skipping if no requirements.txt"
 
       - name: 🚀 Run MLflow Project
         run: |
           source ~/.bashrc
-          conda activate forest-cover-classification
+          conda activate forest_cover_classification
           cd MLProject
           mlflow run . -P data_path=$CSV_URL --env-manager=local
 
@@ -71,7 +71,7 @@ jobs:
       - name: 🏷️ Get latest MLflow run_id
         run: |
           source ~/.bashrc
-          conda activate forest-cover-classification
+          conda activate forest_cover_classification
           echo "Checking contents of MLProject/mlruns/0/"
           ls -l MLProject/mlruns/0/
           RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
@@ -81,7 +81,7 @@ jobs:
       - name: ✅ Verify model directory exists
         run: |
           source ~/.bashrc
-          conda activate forest-cover-classification
+          conda activate forest_cover_classification
           echo "Verifying model directory for RUN_ID: $RUN_ID"
           if [ ! -d "mlruns/0/$RUN_ID/artifacts/model" ]; then
             echo "❌ Model directory not found. Exiting."
@@ -102,7 +102,7 @@ jobs:
       - name: 🐳 Build Docker Image from MLflow Model
         run: |
           source ~/.bashrc
-          conda activate forest-cover-classification
+          conda activate forest_cover_classification
           mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/model" --name forest-cover-model
 
       - name: 🔐 Login to Docker Hub
