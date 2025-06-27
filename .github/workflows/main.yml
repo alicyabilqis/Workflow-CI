@@ -56,6 +56,18 @@ jobs:
           cd MLProject
           mlflow run . -P data_path=$CSV_URL --env-manager=local
 
+      # 🆕 Tambahkan di sini
+      - name: 🔍 Lihat isi folder mlruns
+        run: |
+          echo "LIST isi mlruns:"
+          ls -R mlruns || echo "mlruns folder nggak ada"
+
+          echo "LIST isi artifacts terakhir:"
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          echo "Latest RUN_ID: $RUN_ID"
+          ls -R mlruns/0/$RUN_ID/artifacts || echo "artifacts nggak ada"
+
+
       - name: 🏷️ Get latest MLflow run_id
         run: |
           source ~/.bashrc
