@@ -8,11 +8,17 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-def download_dataset(path):
-    url = "https://drive.google.com/uc?export=download&id=1u4eL5GYTfv5AWZ0PUWNP2N9EEpn6n-NS"
-    print(f"{path} not found. Downloading...")
-    urllib.request.urlretrieve(url, path)
-    print(f"Downloaded to {path}")
+def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> str:
+    if os.path.exists(data_path):
+        print(f"✅ Local file found: {data_path}")
+        return data_path
+    elif data_path.startswith("http"):
+        print(f"⬇️ Downloading dataset from {data_path} ...")
+        urllib.request.urlretrieve(data_path, local_filename)
+        print(f"✅ Downloaded to: {local_filename}")
+        return local_filename
+    else:
+        raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
 
 def main(data_path):
     if not os.path.exists(data_path):
