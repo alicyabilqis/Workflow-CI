@@ -18,71 +18,69 @@ jobs:
       - name: 📦 Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🐍 Setup Python
+      - name: 🐍 Setup Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.12.7"
 
-      - name: 📥 Setup Conda environment
+      - name: 🧪 Check Env Vars
+        run: echo "$CSV_URL"
+
+      - name: 🧬 Setup Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: MLProject/conda.yaml
           activate-environment: Forest_Cover_Classification
           auto-activate-base: false
 
-      - name: 🔧 Init conda & install MLflow
-        shell: bash -l {0}
+      - name: 🔧 Initialize Conda
         run: |
+          conda init bash
+          source ~/.bashrc
+
+      - name: 📦 Install MLflow & Dependencies
+        run: |
+          source ~/.bashrc
           conda activate Forest_Cover_Classification
           pip install mlflow
+          [ -f MLProject/requirements.txt ] && pip install -r MLProject/requirements.txt || echo "No extra requirements"
+
+      - name: 🧹 Clean up invalid mlruns file (if exists)
+        run: |
+          if [ -f "MLProject/mlruns" ]; then
+            echo "❗ Found file named mlruns. Deleting to allow directory creation..."
+            rm MLProject/mlruns
+          fi
+          mkdir -p MLProject/mlruns
 
       - name: 🚀 Run MLflow Project
-        shell: bash -l {0}
         run: |
-          conda activate Forest_Cover_Classification
-          export MLFLOW_TRACKING_URI=./MLProject/mlruns
-          mlflow run MLProject --env-manager=local
-
-      - name: 🔍 Get latest MLflow RUN_ID
-        id: get_run_id
-        shell: bash -l {0}
-        run: |
+          source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
-          echo "📁 Checking mlruns/0/"
-          ls -al mlruns/0 || echo "⚠️ No runs found"
+          mlflow run . -P data_path="Forest cover_preprocessing_dataset.csv" --env-manager=local
 
-          RUN_ID=$(ls -td mlruns/0/*/ 2>/dev/null | head -n 1 | awk -F'/' '{print $3}')
-          if [ -z "$RUN_ID" ]; then
-            echo "❌ No RUN_ID found. MLflow logging failed."
+      - name: 🔍 Get latest MLflow run_id
+        run: |
+          source ~/.bashrc
+          conda activate Forest_Cover_Classification
+          echo "Checking contents of MLProject/mlruns/0/"
+          ls -l MLProject/mlruns/0/ || exit 1
+          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "✅ Latest RUN_ID: $RUN_ID"
+
+      - name: ✅ Verify model directory exists
+        run: |
+          source ~/.bashrc
+          conda activate Forest_Cover_Classification
+          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/best_model_tuned" ]; then
+            echo "❌ Model not found at expected path. Exiting."
             exit 1
           fi
-          echo "✅ Found RUN_ID=$RUN_ID"
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "✅ Model verified."
 
-      - name: 📂 Show logged artifacts
-        shell: bash -l {0}
-        run: |
-          conda activate Forest_Cover_Classification
-          cd MLProject
-          RUN_ID=${{ steps.get_run_id.outputs.run_id }}
-          echo "📁 Artifacts for run_id: $RUN_ID"
-          ls -R mlruns/0/$RUN_ID/artifacts/
-
-      - name: ✅ Verify model artifact exists
-        shell: bash -l {0}
-        run: |
-          cd MLProject
-          RUN_ID=${{ steps.get_run_id.outputs.run_id }}
-          ARTIFACT="mlruns/0/$RUN_ID/artifacts/best_model_tuned"
-          if [ ! -d "$ARTIFACT" ]; then
-            echo "❌ best_model_tuned not found."
-            exit 1
-          fi
-          echo "✅ Model artifact verified."
-
-      - name: 📤 Commit mlruns to repository
-        shell: bash -l {0}
+      - name: 📤 Push mlruns to repository
         run: |
           git config --global user.name "${{ secrets.GIT_USERNAME }}"
           git config --global user.email "${{ secrets.GIT_EMAIL }}"
@@ -94,12 +92,11 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
 
       - name: 🐳 Build Docker image from MLflow model
-        shell: bash -l {0}
         run: |
-          cd MLProject
-          RUN_ID=${{ steps.get_run_id.outputs.run_id }}
+          source ~/.bashrc
+          conda activate Forest_Cover_Classification
           mlflow models build-docker \
-            --model-uri "file://mlruns/0/$RUN_ID/artifacts/best_model_tuned" \
+            --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/best_model_tuned" \
             --name cc
 
       - name: 🔐 Login to Docker Hub
@@ -108,10 +105,10 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: 🏷️ Tag Docker image
+      - name: 🏷️ Tag Docker Image
         run: |
           docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
 
-      - name: 📦 Push Docker image to Docker Hub
+      - name: 📦 Push Docker Image
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
