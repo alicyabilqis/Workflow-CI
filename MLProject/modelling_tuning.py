@@ -22,6 +22,9 @@ def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> s
 
 # 🔧 Fungsi utama training dan tuning
 def main(data_path):
+    mlflow.set_tracking_uri("file:./mlruns")
+    mlflow.set_experiment("Forest_Cover_Classification")
+    
     local_data_path = download_if_needed(data_path)
     df = pd.read_csv(local_data_path)
 
