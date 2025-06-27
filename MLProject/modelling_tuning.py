@@ -5,9 +5,9 @@ import argparse
 import os
 import urllib.request
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.metrics import accuracy_score, recall_score, precision_score, confusion_matrix
 
-# 🔧 Fungsi bantu download dataset jika URL
 def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> str:
     if os.path.exists(data_path):
         print(f"✅ Local file found: {data_path}")
@@ -20,53 +20,73 @@ def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> s
     else:
         raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
 
-# 🔧 Fungsi utama training dan tuning
 def main(data_path):
     mlflow.set_tracking_uri("file:./mlruns")
-    mlflow.set_experiment("Forest_Cover_Classification")
-    
+
     local_data_path = download_if_needed(data_path)
     df = pd.read_csv(local_data_path)
 
     X = df.drop("Cover_Type", axis=1)
     y = df["Cover_Type"]
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    n_estimators_range = [50, 100, 150]
-    max_depth_range = [10, 20, 30]
-    best_accuracy = 0
-    best_params = {}
-    best_model = None
-    input_example = X_test.iloc[:1]
+    est = RandomForestClassifier(random_state=42)
+    params = {
+        "n_estimators": [50, 100, 150, 200],
+        "max_depth": [10, 20, 30, 40],
+        "min_samples_split": [2, 5],
+        "min_samples_leaf": [1, 2],
+        "max_features": ["sqrt", "log2"],
+        "bootstrap": [True, False],
+    }
+
+    search = RandomizedSearchCV(
+        estimator=est,
+        param_distributions=params,
+        n_iter=20,
+        cv=3,
+        n_jobs=-1,
+        random_state=42,
+        verbose=1
+    )
+    search.fit(X_train, y_train)
+
+    best_model = search.best_estimator_
+    best_params = search.best_params_
+
+    y_pred = best_model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred, average='macro')
+    precision = precision_score(y_test, y_pred, average='macro')
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    tn, fp, fn, tp = (0, 0, 0, 0) if conf_matrix.shape != (2, 2) else conf_matrix.ravel()
 
     with mlflow.start_run(run_name="Hyperparameter_Tuning"):
-        for n in n_estimators_range:
-            for d in max_depth_range:
-                model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
-                model.fit(X_train, y_train)
-                acc = model.score(X_test, y_test)
-
-                mlflow.log_metric(f"accuracy_n{n}_d{d}", acc)
-                print(f"Tuning - n_estimators={n}, max_depth={d}, accuracy={acc:.4f}")
-
-                if acc > best_accuracy:
-                    best_accuracy = acc
-                    best_params = {"n_estimators": n, "max_depth": d}
-                    best_model = model
-
         mlflow.log_params(best_params)
-        mlflow.log_metric("best_accuracy", best_accuracy)
+        mlflow.log_metric("accuracy", acc)
+        mlflow.log_metric("recall", recall)
+        mlflow.log_metric("precision", precision)
+        if conf_matrix.shape == (2, 2):
+            mlflow.log_metric("true_negative", tn)
+            mlflow.log_metric("false_positive", fp)
+            mlflow.log_metric("false_negative", fn)
+            mlflow.log_metric("true_positive", tp)
+
         mlflow.sklearn.log_model(
             sk_model=best_model,
-            artifact_path="best_model_tuned",
-            input_example=input_example
+            artifact_path="model",
+            input_example=X_test.iloc[:5]
         )
 
-    print(f"\n🎯 Model terbaik hasil tuning: {best_params} - Accuracy: {best_accuracy:.4f}")
+    print("Best Parameters:", best_params)
+    print(f"Accuracy: {acc}")
+    print(f"Recall: {recall}")
+    print(f"Precision: {precision}")
+    print("Confusion Matrix:\n", conf_matrix)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", type=str, required=True)
     args = parser.parse_args()
     main(args.data_path)
-
