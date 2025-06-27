@@ -19,6 +19,10 @@ def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> s
         return local_filename
     else:
         raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
+        
+def main(data_path):
+    # Download if it's a URL or doesn't exist
+    local_data_path = download_if_needed(data_path)
 
 def main(data_path):
     if not os.path.exists(data_path):
