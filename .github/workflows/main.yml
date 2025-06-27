@@ -45,13 +45,10 @@ jobs:
           pip install mlflow
           [ -f MLProject/requirements.txt ] && pip install -r MLProject/requirements.txt || echo "No extra requirements"
 
-      - name: 🧹 Clean up invalid mlruns file (if exists)
+      - name: 🧹 Clean mlruns and re-init default experiment if needed
         run: |
-          if [ -f "MLProject/mlruns" ]; then
-            echo "❗ Found file named mlruns. Deleting to allow directory creation..."
-            rm MLProject/mlruns
-          fi
-          mkdir -p MLProject/mlruns
+          rm -rf MLProject/mlruns
+          mlflow experiments create --experiment-name "Forest Cover Classification" || true
       
       - name: 🚀 Run MLflow Project
         run: |
