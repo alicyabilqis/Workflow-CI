@@ -21,8 +21,8 @@ def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> s
         raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
 
 def main(data_path):
-    mlflow.set_tracking_uri("file:./mlruns")
-    # ❌ JANGAN pakai set_experiment() kalau dijalankan via `mlflow run .`
+    #mlflow.set_tracking_uri("file:./mlruns")
+    # JANGAN pakai set_experiment() kalau dijalankan via `mlflow run .`
 
     local_data_path = download_if_needed(data_path)
     df = pd.read_csv(local_data_path)
@@ -70,12 +70,13 @@ def main(data_path):
             mlflow.log_metric("false_positive", fp)
             mlflow.log_metric("false_negative", fn)
             mlflow.log_metric("true_positive", tp)
-
-        mlflow.sklearn.log_model(
-            sk_model=best_model,
-            artifact_path="model",
-            input_example=X_test.iloc[:5]
-        )
+        mlflow.sklearn.log_model(best_model, "model", input_example=X_test.iloc[:5])
+            
+        #mlflow.sklearn.log_model(
+            #sk_model=best_model,
+            #artifact_path="model",
+            #input_example=X_test.iloc[:5]
+        #)
 
     print("Best Parameters:", best_params)
     print(f"Accuracy: {acc}")
