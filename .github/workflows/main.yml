@@ -91,7 +91,7 @@ jobs:
       - name: Get latest MLflow run_id
         run: |
           source ~/.bashrc
-          conda activate heart-attack-predictor
+          conda activate Forest_Cover_Classification
           # Cek jika direktori mlruns/0 ada dan menampilkan kontennya
           echo "Checking contents of MLProject/mlruns/0/"
           ls -l MLProject/mlruns/0/
@@ -102,7 +102,7 @@ jobs:
       - name: Verify model directory exists for RUN_ID
         run: |
           source ~/.bashrc
-          conda activate heart-attack-predictor
+          conda activate Forest_Cover_Classification
           echo "Verifying the model directory for RUN_ID: $RUN_ID"
           if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/model" ]; then
             echo "Model not found for RUN_ID: $RUN_ID. Exiting."
