@@ -21,8 +21,8 @@ def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> s
         raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
 
 def main(data_path):
-    # HAPUS BARIS INI JIKA PAKAI `mlflow run .`
-    # mlflow.set_experiment("Forest_Cover_Classification")
+    mlflow.set_tracking_uri("file:./mlruns")
+    # ❌ JANGAN pakai set_experiment() kalau dijalankan via `mlflow run .`
 
     local_data_path = download_if_needed(data_path)
     df = pd.read_csv(local_data_path)
@@ -41,7 +41,7 @@ def main(data_path):
     search = RandomizedSearchCV(
         estimator=est,
         param_distributions=params,
-        n_iter=20,
+        n_iter=9,
         cv=3,
         n_jobs=-1,
         random_state=42,
@@ -59,7 +59,7 @@ def main(data_path):
     conf_matrix = confusion_matrix(y_test, y_pred)
     tn, fp, fn, tp = (0, 0, 0, 0) if conf_matrix.shape != (2, 2) else conf_matrix.ravel()
 
-    # ⚠️ INI PENTING: JANGAN pakai `run_name` atau `nested`!
+    # ✅ TANPA run_name & TANPA nested=True
     with mlflow.start_run():
         mlflow.log_params(best_params)
         mlflow.log_metric("accuracy", acc)
@@ -88,3 +88,4 @@ if __name__ == "__main__":
     parser.add_argument("--data_path", type=str, required=True)
     args = parser.parse_args()
     main(args.data_path)
+
