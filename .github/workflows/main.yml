@@ -47,13 +47,13 @@ jobs:
           conda activate Forest_Cover_Classification
           mlflow run MLProject --env-manager=local
 
-      - name: 🔍 Get latest MLflow run_id
+      - name: 🔍 Get MLflow run_id from run name
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          echo "Checking contents of mlruns/0/"
-          ls -l mlruns/0/
-          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          cd MLProject
+          echo "Searching for run_name: Hyperparameter_Tuning"
+          RUN_ID=$(grep -l "run_name: Hyperparameter_Tuning" mlruns/0/*/meta.yaml | head -n 1 | cut -d'/' -f2)
           echo "Detected RUN_ID=$RUN_ID"
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
