@@ -59,7 +59,7 @@ def main(data_path):
     conf_matrix = confusion_matrix(y_test, y_pred)
     tn, fp, fn, tp = (0, 0, 0, 0) if conf_matrix.shape != (2, 2) else conf_matrix.ravel()
 
-    with mlflow.start_run(run_name="Hyperparameter_Tuning"):
+    with mlflow.start_run():
         mlflow.log_params(best_params)
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("recall", recall)
