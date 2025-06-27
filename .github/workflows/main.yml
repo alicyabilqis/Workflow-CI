@@ -83,7 +83,7 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           echo "Verifying model directory for RUN_ID: $RUN_ID"
-          if [ ! -d "mlruns/0/$RUN_ID/artifacts/model" ]; then
+          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/model" ]; then
             echo "❌ Model directory not found. Exiting."
             exit 1
           fi
