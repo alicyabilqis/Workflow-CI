@@ -57,23 +57,33 @@ jobs:
           cd MLProject
           mlflow run . --env-manager=local --experiment-name "Forest_Cover_Classification"
 
-      - name: 🔍 Get Experiment ID
+
+      - name: 🔍 Get Experiment ID via Python
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          EXPERIMENT_ID=$(mlflow experiments search | grep "Forest_Cover_Classification" | awk '{print $1}')
-          echo "EXPERIMENT_ID=$EXPERIMENT_ID"
-          echo "EXPERIMENT_ID=$EXPERIMENT_ID" >> $GITHUB_ENV
-        shell: bash
+          echo "Getting EXPERIMENT_ID via Python..."
+          python -c "
+      import mlflow
+      client = mlflow.tracking.MlflowClient()
+      exp = client.get_experiment_by_name('Forest_Cover_Classification')
+      if exp:
+          print(f'EXPERIMENT_ID={exp.experiment_id}')
+          with open('${GITHUB_ENV}', 'a') as f:
+              f.write(f'EXPERIMENT_ID={exp.experiment_id}\n')
+      else:
+          raise Exception('❌ Experiment not found')
+      "
+
 
       - name: 🔍 Get latest MLflow run_id
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          python -c "from mlflow.tracking import MlflowClient; \
-          exp = MlflowClient().get_experiment_by_name('Forest_Cover_Classification'); \
-          print(f'EXPERIMENT_ID={exp.experiment_id}' if exp else 'Experiment not found')" >> $GITHUB_ENV
-
+          echo "Getting RUN_ID..."
+          RUN_ID=$(ls -td MLProject/mlruns/$EXPERIMENT_ID/*/ | head -n 1 | xargs -n1 basename)
+          echo "RUN_ID=$RUN_ID"
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
       - name: ✅ Verify model directory exists
         run: |
