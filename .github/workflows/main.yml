@@ -57,35 +57,57 @@ jobs:
           cd MLProject
           mlflow run . --env-manager=local --experiment-name "Forest_Cover_Classification"
 
-      - name: 🔍 Get Experiment ID via Python
-        shell: bash
-        run: |
-          source ~/.bashrc
-          conda activate Forest_Cover_Classification
-          python -c "import mlflow; client = mlflow.tracking.MlflowClient(); \
-          exp = client.get_experiment_by_name('Forest_Cover_Classification'); \
-          print(f'EXPERIMENT_ID={exp.experiment_id}' if exp else 'Experiment not found'); \
-          open('${GITHUB_ENV}', 'a').write(f'EXPERIMENT_ID={exp.experiment_id}\n') if exp else exit(1)"
+      #- name: 🔍 Get Experiment ID via Python
+      #  shell: bash
+      #  run: |
+      #    source ~/.bashrc
+      #    conda activate Forest_Cover_Classification
+      #    python -c "import mlflow; client = mlflow.tracking.MlflowClient(); \
+      #    exp = client.get_experiment_by_name('Forest_Cover_Classification'); \
+      #    print(f'EXPERIMENT_ID={exp.experiment_id}' if exp else 'Experiment not found'); \
+      #    open('${GITHUB_ENV}', 'a').write(f'EXPERIMENT_ID={exp.experiment_id}\n') if exp else exit(1)"
 
-      - name: 🔍 Get latest MLflow run_id
-        shell: bash
+      #- name: 🔍 Get latest MLflow run_id
+      #  shell: bash
+      #  run: |
+      #    source ~/.bashrc
+      #    conda activate Forest_Cover_Classification
+      #    echo "Getting RUN_ID..."
+      #    RUN_ID=$(ls -td MLProject/mlruns/$EXPERIMENT_ID/*/ | head -n 1 | xargs -n1 basename)
+      #    echo "RUN_ID=$RUN_ID"
+      #    echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+
+      #- name: ✅ Verify model directory exists
+      #  run: |
+      #    source ~/.bashrc
+      #    conda activate Forest_Cover_Classification
+      #    if [ ! -d "MLProject/mlruns/$EXPERIMENT_ID/$RUN_ID/artifacts/best_model_tuned" ]; then
+      #      echo "❌ Model not found at expected path. Exiting."
+      #      exit 1
+      #    fi
+      #    echo "✅ Model verified."
+
+            # Get latest run_id
+      - name: Get latest MLflow run_id
         run: |
           source ~/.bashrc
-          conda activate Forest_Cover_Classification
-          echo "Getting RUN_ID..."
-          RUN_ID=$(ls -td MLProject/mlruns/$EXPERIMENT_ID/*/ | head -n 1 | xargs -n1 basename)
-          echo "RUN_ID=$RUN_ID"
+          conda activate heart-attack-predictor
+          # Cek jika direktori mlruns/0 ada dan menampilkan kontennya
+          echo "Checking contents of MLProject/mlruns/0/"
+          ls -l MLProject/mlruns/0/
+          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-
-      - name: ✅ Verify model directory exists
+          echo "Latest run_id: $RUN_ID"
+      # Verify the existence of the model directory for RUN_ID
+      - name: Verify model directory exists for RUN_ID
         run: |
           source ~/.bashrc
-          conda activate Forest_Cover_Classification
-          if [ ! -d "MLProject/mlruns/$EXPERIMENT_ID/$RUN_ID/artifacts/best_model_tuned" ]; then
-            echo "❌ Model not found at expected path. Exiting."
+          conda activate heart-attack-predictor
+          echo "Verifying the model directory for RUN_ID: $RUN_ID"
+          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/model" ]; then
+            echo "Model not found for RUN_ID: $RUN_ID. Exiting."
             exit 1
           fi
-          echo "✅ Model verified."
 
       - name: 📤 Push mlruns to repository
         run: |
