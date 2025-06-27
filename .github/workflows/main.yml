@@ -35,8 +35,8 @@ jobs:
           conda init bash
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          pip install -r MLProject/requirements.txt || true
           pip install mlflow
+          pip install -r MLProject/requirements.txt || true
 
       - name: 🚀 Run MLflow Project
         run: |
@@ -44,31 +44,33 @@ jobs:
           conda activate Forest_Cover_Classification
           mlflow run MLProject --env-manager=local
 
-      - name: 🔍 Get MLflow RUN_ID
+      - name: 🔍 Get Latest MLflow RUN_ID
         id: get_run_id
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
-          echo "🔎 Looking for run_name: Hyperparameter_Tuning"
-          RUN_ID=$(grep -l "run_name: Hyperparameter_Tuning" mlruns/0/*/meta.yaml | head -n 1 | cut -d'/' -f3)
+          echo "🧠 Reading latest run_id from mlruns/0/"
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | awk -F'/' '{print $3}')
           echo "✅ Found RUN_ID=$RUN_ID"
-          echo "::set-output name=run_id::$RUN_ID"
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
       - name: 📂 Show logged artifacts
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
-          echo "📁 Artifacts in latest run:"
-          ls -R mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts/
+          RUN_ID=${{ steps.get_run_id.outputs.run_id }}
+          echo "Artifacts for run_id: $RUN_ID"
+          ls -R mlruns/0/$RUN_ID/artifacts/
 
       - name: ✅ Verify model artifacts exist
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
-          ARTIFACT_DIR="mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts"
+          RUN_ID=${{ steps.get_run_id.outputs.run_id }}
+          ARTIFACT_DIR="mlruns/0/$RUN_ID/artifacts"
           if [ ! -d "$ARTIFACT_DIR/best_model_tuned" ]; then
             echo "❌ best_model_tuned not found in $ARTIFACT_DIR"
             exit 1
@@ -91,8 +93,9 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
+          RUN_ID=${{ steps.get_run_id.outputs.run_id }}
           mlflow models build-docker \
-            --model-uri "file://mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts/best_model_tuned" \
+            --model-uri "file://mlruns/0/$RUN_ID/artifacts/best_model_tuned" \
             --name cc
 
       - name: 🔐 Login to Docker Hub
@@ -101,10 +104,10 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: 🏷️ Tag Docker Image
+      - name: 🏷️ Tag Docker image
         run: |
           docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
 
-      - name: 📦 Push Docker Image to Docker Hub
+      - name: 📦 Push Docker image to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
