@@ -57,26 +57,18 @@ jobs:
           cd MLProject
           mlflow run . --env-manager=local --experiment-name "Forest_Cover_Classification"
 
-
       - name: 🔍 Get Experiment ID via Python
+        shell: bash
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          echo "Getting EXPERIMENT_ID via Python..."
-          python -c "
-      import mlflow
-      client = mlflow.tracking.MlflowClient()
-      exp = client.get_experiment_by_name('Forest_Cover_Classification')
-      if exp:
-          print(f'EXPERIMENT_ID={exp.experiment_id}')
-          with open('${GITHUB_ENV}', 'a') as f:
-              f.write(f'EXPERIMENT_ID={exp.experiment_id}\n')
-      else:
-          raise Exception('❌ Experiment not found')
-      "
-
+          python -c "import mlflow; client = mlflow.tracking.MlflowClient(); \
+          exp = client.get_experiment_by_name('Forest_Cover_Classification'); \
+          print(f'EXPERIMENT_ID={exp.experiment_id}' if exp else 'Experiment not found'); \
+          open('${GITHUB_ENV}', 'a').write(f'EXPERIMENT_ID={exp.experiment_id}\n') if exp else exit(1)"
 
       - name: 🔍 Get latest MLflow run_id
+        shell: bash
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
@@ -111,19 +103,4 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           mlflow models build-docker \
-            --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/$EXPERIMENT_ID/$RUN_ID/artifacts/best_model_tuned" \
-            --name cc
-
-      - name: 🔐 Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: 🏷️ Tag Docker Image
-        run: |
-          docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
-
-      - name: 📦 Push Docker Image
-        run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+            --
