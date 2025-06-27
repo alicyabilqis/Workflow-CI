@@ -45,11 +45,11 @@ jobs:
           pip install mlflow
           [ -f MLProject/requirements.txt ] && pip install -r MLProject/requirements.txt || echo "No extra requirements"
 
-      - name: 🧹 Clean mlruns and re-init default experiment if needed
+      - name: 🧹 Clean mlruns and re-init experiment
         run: |
           rm -rf MLProject/mlruns
           mlflow experiments create --experiment-name "Forest Cover Classification" || true
-      
+
       - name: 🚀 Run MLflow Project
         run: |
           source ~/.bashrc
@@ -57,14 +57,21 @@ jobs:
           cd MLProject
           mlflow run . --env-manager=local --experiment-name "Forest Cover Classification"
 
+      - name: 🔍 Get Experiment ID
+        run: |
+          source ~/.bashrc
+          conda activate Forest_Cover_Classification
+          EXPERIMENT_ID=$(mlflow experiments list | grep "Forest Cover Classification" | awk '{print $1}')
+          echo "EXPERIMENT_ID=$EXPERIMENT_ID" >> $GITHUB_ENV
+        shell: bash
 
       - name: 🔍 Get latest MLflow run_id
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          echo "Checking contents of MLProject/mlruns/0/"
-          ls -l MLProject/mlruns/0/ || exit 1
-          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
+          echo "Checking contents of MLProject/mlruns/$EXPERIMENT_ID/"
+          ls -l MLProject/mlruns/$EXPERIMENT_ID/ || exit 1
+          RUN_ID=$(ls -td MLProject/mlruns/$EXPERIMENT_ID/*/ | head -n 1 | cut -d'/' -f4)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "✅ Latest RUN_ID: $RUN_ID"
 
@@ -72,7 +79,7 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/best_model_tuned" ]; then
+          if [ ! -d "MLProject/mlruns/$EXPERIMENT_ID/$RUN_ID/artifacts/best_model_tuned" ]; then
             echo "❌ Model not found at expected path. Exiting."
             exit 1
           fi
@@ -94,7 +101,7 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           mlflow models build-docker \
-            --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/best_model_tuned" \
+            --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/$EXPERIMENT_ID/$RUN_ID/artifacts/best_model_tuned" \
             --name cc
 
       - name: 🔐 Login to Docker Hub
@@ -106,7 +113,7 @@ jobs:
       - name: 🏷️ Tag Docker Image
         run: |
           docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
-          
+
       - name: 📦 Push Docker Image
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
