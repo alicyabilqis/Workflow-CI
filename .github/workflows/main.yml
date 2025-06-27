@@ -52,12 +52,13 @@ jobs:
             rm MLProject/mlruns
           fi
           mkdir -p MLProject/mlruns
-
+      
       - name: 🚀 Run MLflow Project
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
+          export MLFLOW_TRACKING_URI=./mlruns  # ⬅️ INI WAJIB KALAU cd MLProject
           mlflow run . -P data_path="Forest cover_preprocessing_dataset.csv" --env-manager=local
 
       - name: 🔍 Get latest MLflow run_id
