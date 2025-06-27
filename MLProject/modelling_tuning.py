@@ -33,12 +33,8 @@ def main(data_path):
 
     est = RandomForestClassifier(random_state=42)
     params = {
-        "n_estimators": [50, 100, 150, 200],
-        "max_depth": [10, 20, 30, 40],
-        "min_samples_split": [2, 5],
-        "min_samples_leaf": [1, 2],
-        "max_features": ["sqrt", "log2"],
-        "bootstrap": [True, False],
+        "n_estimators": [50, 100, 150],
+        "max_depth": [10, 20, 30],
     }
 
     search = RandomizedSearchCV(
