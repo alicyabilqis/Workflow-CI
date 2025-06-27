@@ -61,7 +61,8 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          EXPERIMENT_ID=$(mlflow experiments list | grep "Forest Cover Classification" | awk '{print $1}')
+          EXPERIMENT_ID=$(mlflow experiments search | grep "Forest Cover Classification" | awk '{print $1}')
+          echo "EXPERIMENT_ID=$EXPERIMENT_ID"
           echo "EXPERIMENT_ID=$EXPERIMENT_ID" >> $GITHUB_ENV
         shell: bash
 
