@@ -71,7 +71,7 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           python -c "from mlflow.tracking import MlflowClient; \
-          exp = MlflowClient().get_experiment_by_name('Forest Cover Classification'); \
+          exp = MlflowClient().get_experiment_by_name('Forest_Cover_Classification'); \
           print(f'EXPERIMENT_ID={exp.experiment_id}' if exp else 'Experiment not found')" >> $GITHUB_ENV
 
 
