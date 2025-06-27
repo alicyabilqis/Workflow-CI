@@ -51,9 +51,9 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          echo "Checking contents of MLProject/mlruns/0/"
-          ls -l MLProject/mlruns/0/
-          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
+          echo "Checking contents of mlruns/0/"
+          ls -l mlruns/0/
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
           echo "Detected RUN_ID=$RUN_ID"
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
@@ -62,26 +62,28 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           echo "Artifacts in latest run ($RUN_ID):"
-          ls -R MLProject/mlruns/0/$RUN_ID/artifacts/
+          ls -R mlruns/0/$RUN_ID/artifacts/
+
 
       - name: ✅ Verify model artifacts exist
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           echo "Verifying model artifacts for RUN_ID: $RUN_ID"
-          ARTIFACT_DIR="MLProject/mlruns/0/$RUN_ID/artifacts"
+          ARTIFACT_DIR="mlruns/0/$RUN_ID/artifacts"
           if [ ! -d "$ARTIFACT_DIR/best_model_tuned" ]; then
-            echo "❌ best_model_tuned not found in $ARTIFACT_DIR"
-            exit 1
+          echo "❌ best_model_tuned not found in $ARTIFACT_DIR"
+          exit 1
           fi
           echo "✅ Model artifacts verified."
+
 
       - name: 📤 Commit mlruns to repository
         run: |
           git config --global user.name "${{ secrets.GIT_USERNAME }}"
           git config --global user.email "${{ secrets.GIT_EMAIL }}"
           git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
-          git add MLProject/mlruns || true
+          git add mlruns || true
           git commit -m "Add mlruns from CI run" || echo "No changes to commit"
           git push origin main
         env:
@@ -91,7 +93,8 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Forest_Cover_Classification
-          mlflow models build-docker --model-uri "file://MLProject/mlruns/0/$RUN_ID/artifacts/best_model_tuned" --name cc
+          mlflow models build-docker --model-uri "file://mlruns/0/$RUN_ID/artifacts/best_model_tuned" --name cc
+
 
       - name: 🔐 Login to Docker Hub
         uses: docker/login-action@v2
