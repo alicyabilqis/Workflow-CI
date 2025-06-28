@@ -68,12 +68,12 @@ jobs:
       - name: 🔍 Lihat isi folder mlruns
         run: |
           echo "LIST isi mlruns:"
-          ls -R mlruns || echo "mlruns folder nggak ada"
+          ls -R ls -R MLProject/mlruns || echo "mlruns folder nggak ada"
 
           echo "LIST isi artifacts terakhir:"
-          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
           echo "Latest RUN_ID: $RUN_ID"
-          ls -R mlruns/0/$RUN_ID/artifacts || echo "artifacts nggak ada"
+          ls -R MLProject/mlruns/0/$RUN_ID/artifacts || echo "artifacts nggak ada"
 
 
       - name: 🏷️ Get latest MLflow run_id
