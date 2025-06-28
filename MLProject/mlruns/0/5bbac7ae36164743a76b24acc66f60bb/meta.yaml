@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/5bbac7ae36164743a76b24acc66f60bb/artifacts
+end_time: 1751107526057
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 5bbac7ae36164743a76b24acc66f60bb
+run_name: adorable-eel-140
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751107460127
+status: 3
+tags: []
+user_id: runner
