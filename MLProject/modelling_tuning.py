@@ -91,3 +91,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     main(args.data_path)
 
+print("Current MLflow tracking URI:", mlflow.get_tracking_uri())
+
