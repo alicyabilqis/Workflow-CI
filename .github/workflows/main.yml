@@ -62,6 +62,7 @@ jobs:
           source ~/.bashrc
           conda activate Forest_Cover_Classification
           cd MLProject
+          export MLFLOW_TRACKING_URI=./mlruns
           mlflow run . -P data_path=$CSV_URL --env-manager=local
 
       # 🆕 Tambahkan di sini
