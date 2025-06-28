@@ -21,7 +21,7 @@ def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> s
         raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
 
 def main(data_path):
-    mlflow.set_tracking_uri("file:MLProject/mlruns")
+    #mlflow.set_tracking_uri("file:MLProject/mlruns")
     #mlflow.set_tracking_uri("file:./mlruns")
     # JANGAN pakai set_experiment() kalau dijalankan via `mlflow run .`
 
