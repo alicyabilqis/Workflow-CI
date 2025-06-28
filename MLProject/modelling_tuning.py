@@ -37,8 +37,8 @@ def main(data_path):
     params = {
         #"n_estimators": [50, 100, 150],
         #"max_depth": [10, 20, 30],
-        "n_estimators": [150],
-        "max_depth": [30],
+        "n_estimators": [10, 20, 30],
+        "max_depth": [5, 7, 10],
     }
 
     search = RandomizedSearchCV(
