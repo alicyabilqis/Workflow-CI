@@ -49,6 +49,14 @@ jobs:
           pip install mlflow
           pip install -r MLProject/requirements.txt || echo "Skipping if no requirements.txt"
 
+      - name: 🧼 Clean and create mlruns directory
+        run: |
+          if [ -f MLProject/mlruns ]; then
+            echo "⚠️ 'mlruns' is a file. Removing it..."
+            rm MLProject/mlruns
+          fi
+            mkdir -p MLProject/mlruns
+
       - name: 🚀 Run MLflow Project
         run: |
           source ~/.bashrc
