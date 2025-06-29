@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/ce7a10b21dae4adea75a6162834fc90a/artifacts
+end_time: 1751166236876
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: ce7a10b21dae4adea75a6162834fc90a
+run_name: ambitious-hawk-793
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751166012223
+status: 3
+tags: []
+user_id: runner
