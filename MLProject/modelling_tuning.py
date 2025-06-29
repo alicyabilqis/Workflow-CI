@@ -40,7 +40,7 @@ def main(data_path):
         #"n_estimators": [10, 20, 30],
         #"max_depth": [5, 7, 10],
         "n_estimators": [40, 50, 60],
-        "max_depth": [12, 15, 18], 
+        "max_depth": [12, 14, 16], 
     }
 
     search = RandomizedSearchCV(
