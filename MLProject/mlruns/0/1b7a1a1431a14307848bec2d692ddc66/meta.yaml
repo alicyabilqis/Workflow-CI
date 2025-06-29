@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/1b7a1a1431a14307848bec2d692ddc66/artifacts
+end_time: 1751163027120
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 1b7a1a1431a14307848bec2d692ddc66
+run_name: funny-fly-776
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751162803704
+status: 3
+tags: []
+user_id: runner
