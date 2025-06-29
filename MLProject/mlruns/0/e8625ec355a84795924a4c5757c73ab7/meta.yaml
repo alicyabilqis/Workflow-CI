@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/e8625ec355a84795924a4c5757c73ab7/artifacts
+end_time: 1751164584843
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: e8625ec355a84795924a4c5757c73ab7
+run_name: able-mouse-754
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751164364033
+status: 3
+tags: []
+user_id: runner
