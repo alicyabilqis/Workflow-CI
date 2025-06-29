@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/12c2d643bf744cb9b316bac48a4a94d1/artifacts
+end_time: 1751168143222
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 12c2d643bf744cb9b316bac48a4a94d1
+run_name: learned-hog-356
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751167902561
+status: 3
+tags: []
+user_id: runner
