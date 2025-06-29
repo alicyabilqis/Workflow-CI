@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/5c2ea86c340f4875867493a2d823a567/artifacts
+end_time: 1751163859008
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 5c2ea86c340f4875867493a2d823a567
+run_name: lyrical-steed-135
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751163631734
+status: 3
+tags: []
+user_id: runner
