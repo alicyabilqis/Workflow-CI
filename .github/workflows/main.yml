@@ -115,7 +115,7 @@ jobs:
           conda activate Forest_Cover_Classification
           #mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/model" --name forest-cover-model
           MODEL_ID=$(ls -1 MLProject/mlruns/0/models | head -n 1)
-          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/models/$MODEL_ID/artifacts"
+          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/models/$MODEL_ID/artifacts" --name forest-cover-model
 
 
       - name: 🔐 Login to Docker Hub
