@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/c61966933fa840519a0ee18aa5dd49aa/artifacts
+end_time: 1751278136595
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c61966933fa840519a0ee18aa5dd49aa
+run_name: monumental-mouse-256
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751277908712
+status: 3
+tags: []
+user_id: runner
