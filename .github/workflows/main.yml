@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  CSV_URL: "https://drive.google.com/uc?export=download&id=1HHv8WwNGGksU2IwY2vIJlsD8xr5tBsiV"
+  CSV_URL: ""https://drive.google.com/uc?id=1HHv8WwNGGksU2IwY2vIJlsD8xr5tBsiV""
   TARGET_VAR: "Cover_Type"
 
 jobs:
