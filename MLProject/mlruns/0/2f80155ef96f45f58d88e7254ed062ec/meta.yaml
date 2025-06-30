@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/2f80155ef96f45f58d88e7254ed062ec/artifacts
+end_time: 1751271527035
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 2f80155ef96f45f58d88e7254ed062ec
+run_name: aged-flea-867
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751271303768
+status: 3
+tags: []
+user_id: runner
