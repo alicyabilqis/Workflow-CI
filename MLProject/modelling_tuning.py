@@ -8,10 +8,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, recall_score, precision_score, confusion_matrix
 
+import gdown
+
 def download_from_url(url: str, output_file: str = "dataset.csv") -> str:
     print(f"⬇️ Downloading dataset from {url} ...")
-    urllib.request.urlretrieve(url, output_file)
+    gdown.download(url, output_file, quiet=False)
     print(f"✅ Downloaded to: {output_file}")
+    return output_file
 
     # Validasi: cek apakah file benar-benar CSV
     with open(output_file, "r", encoding="utf-8") as f:
