@@ -5,5 +5,7 @@ conda_env: conda.yaml
 entry_points:
   main:
     parameters:
-      data_path: {type: str, default: "https://drive.google.com/uc?export=download&id=1u4eL5GYTfv5AWZ0PUWNP2N9EEpn6n-NS"}
+      data_path: {type: str, default: "https://drive.google.com/uc?id=1HHv8WwNGGksU2IwY2vIJlsD8xr5tBsiV&confirm=t&uuid=466a1242-8326-43e0-ad6b-fc9b7603a5b3"}
     command: "python modelling_tuning.py --data_path {data_path}"
+
+
