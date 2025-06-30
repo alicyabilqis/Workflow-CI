@@ -35,10 +35,6 @@ def main(data_path):
 
     est = RandomForestClassifier(random_state=42)
     params = {
-        #"n_estimators": [50, 100, 150],
-        #"max_depth": [10, 20, 30],
-        #"n_estimators": [10, 20, 30],
-        #"max_depth": [5, 7, 10],
         "n_estimators": [40, 50, 60],
         "max_depth": [12, 14, 16], 
     }
