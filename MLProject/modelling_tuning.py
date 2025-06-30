@@ -8,35 +8,43 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, recall_score, precision_score, confusion_matrix
 
-def download_if_needed(data_path: str, local_filename: str = "dataset.csv") -> str:
-    if os.path.exists(data_path):
-        print(f"✅ Local file found: {data_path}")
-        return data_path
-    elif data_path.startswith("http"):
-        print(f"⬇️ Downloading dataset from {data_path} ...")
-        urllib.request.urlretrieve(data_path, local_filename)
-        print(f"✅ Downloaded to: {local_filename}")
-        return local_filename
-    else:
-        raise FileNotFoundError(f"❌ Data path {data_path} is not valid and doesn't exist.")
+def download_from_url(url: str, output_file: str = "dataset.csv") -> str:
+    print(f"⬇️ Downloading dataset from {url} ...")
+    urllib.request.urlretrieve(url, output_file)
+    print(f"✅ Downloaded to: {output_file}")
+
+    # Validasi: cek apakah file benar-benar CSV
+    with open(output_file, "r", encoding="utf-8") as f:
+        head = f.read(500)
+        if "<html" in head.lower():
+            raise ValueError("❌ File yang diunduh adalah halaman HTML, bukan file CSV yang valid.")
+
+    return output_file
 
 def main(data_path):
-    #mlflow.set_tracking_uri("file:MLProject/mlruns")
-    #mlflow.set_tracking_uri("file:./mlruns")
-    # JANGAN pakai set_experiment() kalau dijalankan via `mlflow run .`
+    # Unduh data langsung dari URL
+    local_data_path = download_from_url(data_path)
 
-    local_data_path = download_if_needed(data_path)
+    # Baca dan validasi CSV
     df = pd.read_csv(local_data_path)
+    print("✅ Loaded dataset shape:", df.shape)
+    print("✅ Columns:", df.columns.tolist())
 
+    if "Cover_Type" not in df.columns:
+        raise ValueError("❌ Kolom 'Cover_Type' tidak ditemukan dalam dataset.")
+
+    # Pisahkan fitur dan target
     X = df.drop("Cover_Type", axis=1)
     y = df["Cover_Type"]
 
+    # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    # Random Forest + Tuning
     est = RandomForestClassifier(random_state=42)
     params = {
         "n_estimators": [40, 50, 60],
-        "max_depth": [12, 14, 16], 
+        "max_depth": [12, 14, 16],
     }
 
     search = RandomizedSearchCV(
@@ -53,6 +61,7 @@ def main(data_path):
     best_model = search.best_estimator_
     best_params = search.best_params_
 
+    # Evaluasi
     y_pred = best_model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
     recall = recall_score(y_test, y_pred, average='macro')
@@ -60,30 +69,27 @@ def main(data_path):
     conf_matrix = confusion_matrix(y_test, y_pred)
     tn, fp, fn, tp = (0, 0, 0, 0) if conf_matrix.shape != (2, 2) else conf_matrix.ravel()
 
-    # ✅ TANPA run_name & TANPA nested=True
+    # Logging ke MLflow
     with mlflow.start_run():
         mlflow.log_params(best_params)
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("recall", recall)
         mlflow.log_metric("precision", precision)
+
         if conf_matrix.shape == (2, 2):
             mlflow.log_metric("true_negative", tn)
             mlflow.log_metric("false_positive", fp)
             mlflow.log_metric("false_negative", fn)
             mlflow.log_metric("true_positive", tp)
-        mlflow.sklearn.log_model(best_model, "model", input_example=X_test.iloc[:5])
-            
-        #mlflow.sklearn.log_model(
-         #   sk_model=best_model,
-         #   artifact_path="model",
-         #   input_example=X_test.iloc[:5]
-        #)
 
-    print("Best Parameters:", best_params)
-    print(f"Accuracy: {acc}")
-    print(f"Recall: {recall}")
-    print(f"Precision: {precision}")
-    print("Confusion Matrix:\n", conf_matrix)
+        mlflow.sklearn.log_model(best_model, "model", input_example=X_test.iloc[:5])
+
+    # Output hasil
+    print("✅ Best Parameters:", best_params)
+    print(f"✅ Accuracy: {acc}")
+    print(f"✅ Recall: {recall}")
+    print(f"✅ Precision: {precision}")
+    print("✅ Confusion Matrix:\n", conf_matrix)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -91,5 +97,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     main(args.data_path)
 
-print("Current MLflow tracking URI:", mlflow.get_tracking_uri())
-
+print("📍 Current MLflow tracking URI:", mlflow.get_tracking_uri())
