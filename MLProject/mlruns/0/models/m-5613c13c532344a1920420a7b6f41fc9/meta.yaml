@@ -1,0 +1,10 @@
+artifact_location: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/models/m-5613c13c532344a1920420a7b6f41fc9/artifacts
+creation_timestamp: 1751272809345
+experiment_id: '0'
+last_updated_timestamp: 1751272811397
+model_id: m-5613c13c532344a1920420a7b6f41fc9
+model_type: null
+name: model
+source_run_id: 1f8b0b354cb14ae79376aa51e9510949
+status: 2
+status_message: null

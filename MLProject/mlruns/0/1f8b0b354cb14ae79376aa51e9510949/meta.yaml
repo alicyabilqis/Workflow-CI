@@ -1,0 +1,14 @@
+artifact_uri: /home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/1f8b0b354cb14ae79376aa51e9510949/artifacts
+end_time: 1751272811845
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 1f8b0b354cb14ae79376aa51e9510949
+run_name: indecisive-vole-194
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751272565536
+status: 3
+tags: []
+user_id: runner
